@@ -1,0 +1,42 @@
+name: C++ CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Install build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential g++ make
+    
+    - name: Check compiler version
+      run: |
+        g++ --version
+        make --version
+    
+    - name: Build project
+      run: make
+    
+    - name: Run tests
+      run: make test
+    
+    - name: Upload test results (if needed)
+      if: always()  # Always run even if tests fail
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: |
+          *.log
+          test_output.txt
+        if-no-files-found: ignore
